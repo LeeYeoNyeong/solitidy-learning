@@ -40,15 +40,4 @@ contract MyToken {
 
         emit Transfer(msg.sender, to, amount);
     }
-    // function totalSupply() external view returns (uint256) {
-    //     return totalSupply;
-    // }
-
-    // function balanceOf(address owner) external view returns (uint256) {
-    //     return balanceOf[owner];
-    // }
-
-    // function name() external view returns (string memory) {
-    //     return name;
-    // }
 }
