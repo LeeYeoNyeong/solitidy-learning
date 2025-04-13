@@ -28,6 +28,7 @@ contract MyToken {
     }
 
     function approve(address spender, uint256 amount) external {
+        require(balanceOf[msg.sender] >= amount, "insufficient balance for approval");
         allowance[msg.sender][spender] = amount;
         emit Approval(spender, amount);
     }

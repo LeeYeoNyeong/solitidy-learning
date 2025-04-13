@@ -5,7 +5,6 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 const mintingAmount = 100n;
 const decimals = 18n;
-
 describe("myToken deploy", () => {
     let myTokenC:MyToken;
     let signers: HardhatEthersSigner[];
@@ -91,6 +90,30 @@ describe("myToken deploy", () => {
                     hre.ethers.parseUnits("1", decimals)
                 )
             ).to.be.revertedWith("insufficient allowance");;
+        });
+
+        it("should transfer tokens using transferFrom", async () => {
+            const signer0 = signers[0];
+            const signer1 = signers[1];
+            const amount = hre.ethers.parseUnits("50", decimals);
+
+            await myTokenC.approve(signer1.address, amount);
+
+            await expect(
+                myTokenC
+                .connect(signer1)
+                .transferFrom(
+                    signer0.address,
+                    signer1.address,
+                    amount
+                )
+            ).to.emit(myTokenC, "Transfer")
+            .withArgs(signer0.address, signer1.address, amount);
+
+            expect(await myTokenC.balanceOf(signer0.address)).to.equal(
+                mintingAmount * 10n ** decimals - amount
+            );
+            expect(await myTokenC.balanceOf(signer1.address)).to.equal(amount);
         });
     });
 });
