@@ -23,6 +23,12 @@ contract MyToken {
         balanceOf[owner] += amount;
     }
 
+    function transfer(uint256 amount, address to) external {
+        require(balanceOf[msg.sender] >= amount, "insufficient balance");
+        
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+    }
     // function totalSupply() external view returns (uint256) {
     //     return totalSupply;
     // }
