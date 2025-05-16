@@ -18,6 +18,11 @@ describe("TinyBank", () => {
         ]);
         tinyBankC = await hre.ethers.deployContract("TinyBank", [
             await myTokenC.getAddress(),
+            signers[0].address,
+            signers[1].address,
+            signers[2].address,
+            signers[3].address,
+            signers[4].address,
         ]);
         await myTokenC.setManager(tinyBankC.getAddress());
     });
@@ -72,11 +77,32 @@ describe("TinyBank", () => {
                 hre.ethers.parseUnits((BLOCKS + MINTING_AMOUNT + 1n).toString())
             );
         });
-        it("should revert when changing rewardPerBlock by hacker", async () => {
-            const hacker = signers[3];
-            const rewardToChange = hre.ethers.parseUnits("10000", DECIMALS);
-            await expect(tinyBankC.connect(hacker).setRewardPerBlock(rewardToChange))
-            .to.be.revertedWith("You are not authorized to manage this contract");
+    });
+
+    describe("MultiManger Access", () => {
+        it("should revert when hacker tries to set reward per block", async () => {
+            const hacker = signers[5]; // 매니저가 아닌 주소
+            
+            await expect(
+                tinyBankC.connect(hacker).confirm()
+            ).to.be.revertedWith("You are not a managers");
+        });
+    
+        it("should revert when not all managers confirmed", async () => {
+            const manager1 = signers[0];
+            const manager2 = signers[1];
+            const manager3 = signers[2];
+            const newReward = hre.ethers.parseUnits("2", DECIMALS);
+    
+            // 3명의 매니저만 confirm, 4번째와 5번째 매니저는 confirm 하지 않음
+            await tinyBankC.connect(manager1).confirm();
+            await tinyBankC.connect(manager2).confirm();
+            await tinyBankC.connect(manager3).confirm();
+
+    
+            await expect(
+                tinyBankC.setRewardPerBlock(newReward)
+            ).to.be.revertedWith("Not all managers confirmed yet");
         });
     });
 });
