@@ -77,4 +77,13 @@ contract TinyBank is ManagedAccess {
         totalStaked -= _amount;
         emit Withdrawn(_amount, msg.sender);
     }
+
+    function currentReward(address to) external view returns (uint256) {
+        if (staked[to] > 0) {
+            uint256 blocks = block.number - lastClaimedBlock[to];
+            return (blocks * rewardPerBlock * staked[to]) /totalStaked;
+        } else {
+            return 0;
+        }
+    }
 }
